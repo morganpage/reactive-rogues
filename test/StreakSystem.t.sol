@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
+
 import {Test, console} from "forge-std/Test.sol";
 import {StreakSystem} from "../src/StreakSystem.sol";
 
@@ -57,14 +58,8 @@ contract StreakSystemTest is Test {
     }
 
     function testClaimForWithoutAdminRole() public {
-        bytes4 selector = bytes4(
-            keccak256("AccessControlUnauthorizedAccount(address,bytes32)")
-        );
-        bytes memory expectedError = abi.encodeWithSelector(
-            selector,
-            user,
-            keccak256("CLAIM_ADMIN_ROLE")
-        );
+        bytes4 selector = bytes4(keccak256("AccessControlUnauthorizedAccount(address,bytes32)"));
+        bytes memory expectedError = abi.encodeWithSelector(selector, user, keccak256("CLAIM_ADMIN_ROLE"));
         vm.expectRevert(expectedError);
         vm.prank(user);
         streakSystem.claimFor(address(this));

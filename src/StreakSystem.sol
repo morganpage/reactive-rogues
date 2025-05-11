@@ -16,11 +16,7 @@ contract StreakSystem is AccessControl {
     mapping(uint256 => uint256) public milestoneToPointReward;
     uint256[] public definedMilestones; // keep track of keys
 
-    event Claimed(
-        address indexed user,
-        uint256 indexed streak,
-        uint256 indexed tokenId
-    );
+    event Claimed(address indexed user, uint256 indexed streak, uint256 indexed tokenId);
     event EarnedNFT(address indexed user, uint256 indexed tokenId);
 
     constructor() {
@@ -38,17 +34,10 @@ contract StreakSystem is AccessControl {
 
     function _claimFor(address user) private {
         //Is this the first time the user is claiming or are they over the reset time? If so set streak to 1
-        if (
-            lastClaimed[user] == 0 ||
-            (streakResetTime != 0 &&
-                block.timestamp - lastClaimed[user] > streakResetTime)
-        ) {
+        if (lastClaimed[user] == 0 || (streakResetTime != 0 && block.timestamp - lastClaimed[user] > streakResetTime)) {
             streak[user] = 1;
         } else {
-            require(
-                block.timestamp - lastClaimed[user] >= streakIncrementTime,
-                "You can't claim yet"
-            );
+            require(block.timestamp - lastClaimed[user] >= streakIncrementTime, "You can't claim yet");
             streak[user]++;
         }
         lastClaimed[user] = block.timestamp;
@@ -71,30 +60,20 @@ contract StreakSystem is AccessControl {
         return block.timestamp;
     }
 
-    function setStreak(
-        address user,
-        uint256 _streak
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setStreak(address user, uint256 _streak) public onlyRole(DEFAULT_ADMIN_ROLE) {
         streak[user] = _streak;
     }
 
-    function setStreakResetTime(
-        uint256 _streakResetTime
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setStreakResetTime(uint256 _streakResetTime) public onlyRole(DEFAULT_ADMIN_ROLE) {
         streakResetTime = _streakResetTime;
     }
 
-    function setStreakIncrementTime(
-        uint256 _streakIncrementTime
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setStreakIncrementTime(uint256 _streakIncrementTime) public onlyRole(DEFAULT_ADMIN_ROLE) {
         streakIncrementTime = _streakIncrementTime;
     }
 
     //Used for testing
-    function claimHoursAgo(
-        address user,
-        uint256 hoursAgo
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function claimHoursAgo(address user, uint256 hoursAgo) public onlyRole(DEFAULT_ADMIN_ROLE) {
         lastClaimed[user] = block.timestamp - hoursAgo * 1 hours;
     }
 
@@ -120,17 +99,11 @@ contract StreakSystem is AccessControl {
         return streakIncrementTime - (block.timestamp - lastClaimed[user]);
     }
 
-    function setTokenMilestone(
-        uint256 milestone,
-        uint256 tokenId
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTokenMilestone(uint256 milestone, uint256 tokenId) public onlyRole(DEFAULT_ADMIN_ROLE) {
         milestoneToTokenId[milestone] = tokenId;
     }
 
-    function setPointMilestone(
-        uint256 milestone,
-        uint256 pointReward
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setPointMilestone(uint256 milestone, uint256 pointReward) public onlyRole(DEFAULT_ADMIN_ROLE) {
         if (milestoneToPointReward[milestone] == 0) {
             definedMilestones.push(milestone);
         }
