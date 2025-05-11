@@ -1,4 +1,4 @@
-##
+# A Fully On-Chain Streak System with NFT Minting using Reactive Contracts
 
 
 ## The Contracts
@@ -15,8 +15,16 @@ setTokenMilestone(10,14)
 ```
 With the above set, on the 1st claim (streak 1), the user would receive 10 points and an NFT with a tokenId of 13. On the 2nd claim (streak 2) they would get another 10 points bringing the total to 20 but no additional NFT. For streaks 3 and 4 they would still get 10 points but on streak 5 they would start to get 50 points and streak 10 they would get an NFT with a tokenId of 14.
 
-Although the NFT rewards are defined in the Streak System contract, the actually minting is done via the [Reactive Network](https://reactive.network/). The Streak System Contract emits an EarnedNFT event that
+Although the NFT rewards are defined in the Streak System contract, the actually minting is done via the [Reactive Network](https://reactive.network/). The Streak System Contract emits an EarnedNFT event that is subscribed to by the StreakSystemReactive contract which emits a callback event picked up by the MintNFTCallback contract on the destination chain which then mints the NFT. Separating the streak system from the minting in this way means that NFTs can be minted on any chain supported by Reactive and even on multiple chains if needed. This makes then streak system very modular and flexible.
 
+### Streak System Reactive
+Subscribes to the EarnedNFT event and emits a callback event that includes the user address and tokenId to mint.
+
+### MintNFTCallback
+Handles the callback event and mints the NFT. Is linked to an NFT contract, in this case an ERC1155 contract.
+
+### Rogues Items
+The ERC1155 contract. Implements all the on-chain game items in World of Rogues.
 
 ## Testnet Deployment
 ```
@@ -61,7 +69,6 @@ forge verify-contract --verifier sourcify --verifier-url https://sourcify.rnk.de
 forge verify-contract --chain-id $DESTINATION_CHAIN_ID $CALLBACK_ADDR --etherscan-api-key $ETHERSCAN_API_KEY MintNFTCallback
 
 forge verify-contract --chain-id $DESTINATION_CHAIN_ID $ERC1155_ADDR --etherscan-api-key $ETHERSCAN_API_KEY RoguesItems
-
 
 ```
 ## Testnet deployment
