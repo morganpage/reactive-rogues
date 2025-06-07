@@ -29,9 +29,9 @@ The ERC1155 contract. Implements all the on-chain game items in World of Rogues.
 ## Testnet Deployment
 ```
 4 Contracts need to be deployed: (replace below addresses with your own as you deploy)
-StreakSystem - Reactive - 0xFc070cB5B8fefB6FF487F0f3d9a06c8C89A90700
-StreakSystemReactive - Reactive - 0xB66B88C72D09A1af2A53467546431E5578B7F009
-MintNFTCallback - Ethereum - 0xb72ce7F273Ea8b6730E2E1fB10B0b3D558Bd07ea
+StreakSystem - Reactive - 0xb1E0Cfc0D39112DC4765097a98F74A525bC6a0B4
+StreakSystemReactive - Reactive - 0x08E88D7Dc8bb2cA8b1F6daAC86063E8036A49Eb2
+MintNFTCallback - Ethereum - 0xac2BA078DdadF1a0fA1208ecAf21ac18ba18F6E7
 RoguesItems - Ethereum - 0x8897167068573d6228Ee8eC62E9DCCEeD193f89F
 ```
 
@@ -56,15 +56,15 @@ SYSTEM_CONTRACT_ADDR=0x0000000000000000000000000000000000fffFfF
 REACTIVE_CHAIN_ID=5318008
 DESTINATION_CHAIN_ID=11155111
 # The deployed address of the StreakSystem contract
-ORIGIN_ADDR=0xFc070cB5B8fefB6FF487F0f3d9a06c8C89A90700
+ORIGIN_ADDR=0xb1E0Cfc0D39112DC4765097a98F74A525bC6a0B4
 # The deployed address of the MintNFTCallback contract
-CALLBACK_ADDR=0xb72ce7F273Ea8b6730E2E1fB10B0b3D558Bd07ea
+CALLBACK_ADDR=0xac2BA078DdadF1a0fA1208ecAf21ac18ba18F6E7
 
 forge create --legacy --broadcast --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY src/StreakSystemReactive.sol:StreakSystemReactive --value 0.01ether --constructor-args $SYSTEM_CONTRACT_ADDR $REACTIVE_CHAIN_ID $DESTINATION_CHAIN_ID $ORIGIN_ADDR $CALLBACK_ADDR
 
 forge verify-contract --verifier sourcify --verifier-url https://sourcify.rnk.dev/ --chain-id $REACTIVE_CHAIN_ID $ORIGIN_ADDR StreakSystem
 
-forge verify-contract --verifier sourcify --verifier-url https://sourcify.rnk.dev/ --chain-id $REACTIVE_CHAIN_ID 0xB66B88C72D09A1af2A53467546431E5578B7F009 StreakSystemReactive
+forge verify-contract --verifier sourcify --verifier-url https://sourcify.rnk.dev/ --chain-id $REACTIVE_CHAIN_ID 0x08E88D7Dc8bb2cA8b1F6daAC86063E8036A49Eb2 StreakSystemReactive
 
 forge verify-contract --chain-id $DESTINATION_CHAIN_ID $CALLBACK_ADDR --etherscan-api-key $ETHERSCAN_API_KEY MintNFTCallback
 
