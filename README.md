@@ -81,19 +81,80 @@ https://kopli.reactscan.net/tx/0xfd73f99cf2d3814de42d9b0a4c310da3d3233541456f931
 ```bash
 cast call $ORIGIN_ADDR "streakIncrementTime()(uint256)" --rpc-url $REACTIVE_RPC
 
-cast call $ORIGIN_ADDR "streak(address)(uint256)" 0xb2F9531bfe0C742135C7D3ad9038d298616a65A9 --rpc-url $REACTIVE_RPC
+cast call $ORIGIN_ADDR "streak(address)(uint256)" 0x7990ec7597e6215958c9bbef7d555f7b72f6b8de --rpc-url $REACTIVE_RPC
 
 #Grant the minter role to the MintNFTCallback contract
-cast send $ERC1155_ADDR "grantMinterRole(address)" $CALLBACK_ADDR --rpc-url $DESTINATION_RPC --private-key $DESTINATION_PRIVATE_KEY
+cast send --legacy $ERC1155_ADDR "grantMinterRole(address)" $CALLBACK_ADDR --rpc-url $DESTINATION_RPC --private-key $DESTINATION_PRIVATE_KEY
 
-#Below doesn't work atm you will need to do this in Remix
-cast send $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 1 13 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 1 13 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
 
-cast send $ORIGIN_ADDR "setStreakResetTime(uint256)" 1 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setStreakResetTime(uint256)" 1 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
 
-cast send $ORIGIN_ADDR "claim()" --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "claim()" --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
 
 ```
+
+## Mainnet deploymet
+
+```bash
+4 Contracts need to be deployed: (replace below addresses with your own as you deploy)
+StreakSystem - Reactive - 0x2eB75a1429F6fE2d60F783c73d656D977AbdfCf9
+StreakSystemReactive - Reactive - 0xC5Bd3532198e2D561f817c22524D1F6f10415bc2
+MintNFTCallback - Reactive - 0x9e3cfE53149adBa88433cB74BE5c1c6aC6A4C097
+RoguesItems - Reactive - 0x8897167068573d6228Ee8eC62E9DCCEeD193f89F
+
+
+
+SYSTEM_CONTRACT_ADDR=0x0000000000000000000000000000000000fffFfF
+REACTIVE_RPC=https://mainnet-rpc.rnk.dev
+
+forge create --legacy --broadcast --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY src/StreakSystem.sol:StreakSystem
+REACTIVE_CHAIN_ID=1597
+ORIGIN_ADDR=0x2eB75a1429F6fE2d60F783c73d656D977AbdfCf9
+forge verify-contract --verifier sourcify --verifier-url https://sourcify.rnk.dev/ --chain-id $REACTIVE_CHAIN_ID $ORIGIN_ADDR StreakSystem
+DESTINATION_RPC=https://mainnet-rpc.rnk.dev
+forge create --legacy --broadcast --rpc-url $DESTINATION_RPC --private-key $DESTINATION_PRIVATE_KEY src/RoguesItems.sol:RoguesItems
+ERC1155_ADDR=0x8897167068573d6228Ee8eC62E9DCCEeD193f89F
+forge verify-contract --verifier sourcify --verifier-url https://sourcify.rnk.dev/ --chain-id $REACTIVE_CHAIN_ID $ERC1155_ADDR RoguesItems
+DESTINATION_CALLBACK_PROXY_ADDR=0x0000000000000000000000000000000000fffFfF
+forge create --legacy --broadcast --rpc-url $DESTINATION_RPC --private-key $DESTINATION_PRIVATE_KEY src/MintNFTCallback.sol:MintNFTCallback --value 0.05ether --constructor-args $DESTINATION_CALLBACK_PROXY_ADDR $ERC1155_ADDR
+CALLBACK_ADDR=0x9e3cfE53149adBa88433cB74BE5c1c6aC6A4C097
+forge verify-contract --verifier sourcify --verifier-url https://sourcify.rnk.dev/ --chain-id $REACTIVE_CHAIN_ID $CALLBACK_ADDR MintNFTCallback
+DESTINATION_CHAIN_ID=1597
+forge create --legacy --broadcast --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY src/StreakSystemReactive.sol:StreakSystemReactive --value 0.01ether --constructor-args $SYSTEM_CONTRACT_ADDR $REACTIVE_CHAIN_ID $DESTINATION_CHAIN_ID $ORIGIN_ADDR $CALLBACK_ADDR
+forge verify-contract --verifier sourcify --verifier-url https://sourcify.rnk.dev/ --chain-id $REACTIVE_CHAIN_ID 0xC5Bd3532198e2D561f817c22524D1F6f10415bc2 StreakSystemReactive
+cast send --legacy $ERC1155_ADDR "grantMinterRole(address)" $CALLBACK_ADDR --rpc-url $DESTINATION_RPC --private-key $DESTINATION_PRIVATE_KEY
+
+cast send --legacy $ERC1155_ADDR "setURI(string)" "ipfs://QmbtJEzuMC5LjdBp4xhUFrubBGTx3uzHeSdzKvjWjeaNpm/" --rpc-url $DESTINATION_RPC --private-key $DESTINATION_PRIVATE_KEY
+
+cast call $ERC1155_ADDR "uri(uint256)(string)" 1 --rpc-url $REACTIVE_RPC
+#Set up rewards
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 1 1 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 5 2 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 10 3 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 15 4 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 20 5 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 25 6 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 30 7 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 35 8 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 40 9 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+cast send --legacy $ORIGIN_ADDR "setTokenMilestone(uint256,uint256)" 50 10 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+
+#
+
+cast send --legacy $ORIGIN_ADDR "claimFor(address)" 0xcE6fF2Ad12F4A27d490FEd5A42b0fDDEf164D6F5 --rpc-url $DESTINATION_RPC --private-key $DESTINATION_PRIVATE_KEY
+cast call $ORIGIN_ADDR "streak(address)(uint256)" 0x7990ec7597e6215958c9bbef7d555f7b72f6b8de --rpc-url $REACTIVE_RPC
+
+
+cast call $ERC1155_ADDR "balanceOf(address,uint256)(uint256)" 0x7990ec7597e6215958c9bbef7d555f7b72f6b8de 1 --rpc-url $REACTIVE_RPC
+
+cast call $ERC1155_ADDR "balanceOfBatchOneAddr(address,uint256[])(uint256[])" 0xcE6fF2Ad12F4A27d490FEd5A42b0fDDEf164D6F5 "[1,2,3,4,5,6,7,8,9,10]" --rpc-url $REACTIVE_RPC
+
+cast send --legacy $ORIGIN_ADDR "setStreakIncrementTime(uint256)" 1 --rpc-url $REACTIVE_RPC --private-key $REACTIVE_PRIVATE_KEY
+
+
+```
+
 
 ## Foundry
 
